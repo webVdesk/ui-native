@@ -1,11 +1,13 @@
-function preventMousedownDefault(event) {
+function preventDefault(event) {
 	event.preventDefault();
 }
 
-export function disableTextSelection() {
-	document.addEventListener('mousedown', preventMousedownDefault);
+export function disableDefaultBehavior() {
+	document.addEventListener('dragstart', preventDefault);
+	document.addEventListener('mousedown', preventDefault);
 }
 
-export function enableTextSelection() {
-	document.removeEventListener('mousedown', preventMousedownDefault);
+export function enableDefaultBehavior() {
+	document.removeEventListener('dragstart', preventDefault);
+	document.removeEventListener('mousedown', preventDefault);
 }

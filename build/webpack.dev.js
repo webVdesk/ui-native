@@ -6,6 +6,7 @@ const base = require('./webpack.base');
 module.exports = merge(base, {
 	entry: {
 		bundle: [
+			'@babel/polyfill',
 			path.resolve(__dirname, '../test/index.js')
 		]
 	},
@@ -23,4 +24,4 @@ module.exports = merge(base, {
 			template: path.resolve(__dirname, './assets/index.html')
 		})
 	]
-})
+});

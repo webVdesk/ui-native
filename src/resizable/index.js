@@ -147,8 +147,6 @@ function HandleFragment(direction, host) {
 				return;
 			}
 
-			event.stopPropagation();
-
 			origin.pointer = { x: event.clientX, y: event.clientY };
 			origin.host.offset = { x: host.offsetLeft, y: host.offsetTop };
 			origin.host.size = { width: host.offsetWidth, height: host.offsetHeight };

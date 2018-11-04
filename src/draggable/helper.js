@@ -27,9 +27,10 @@ export function VdDragEvent(typeName, data, mouseEvent, element) {
 
 export function DefaultOptions() {
 	return {
+		mask: true,
 		handled: false,
 		constraint: false,
-		delay: 50,
+		delay: 0,
 		threshold: 0,
 		axis: null,
 		dataFactory: _.noop,

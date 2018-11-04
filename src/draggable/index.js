@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import Controller from '../controller';
+import createMask from './mask';
 import * as handle from './handle';
 import * as page from './page';
 import {
@@ -11,7 +12,7 @@ import {
 	getPointerClientPosition,
 	getElementOffsetPosition,
 	constraintFilter,
-	computeElementOffset
+	computeElementOffset,
 } from './helper';
 
 const STATE = { IDLE: -1, READY: 0, MOVING: 1 };
@@ -29,19 +30,27 @@ export default class DraggableController extends Controller {
 			},
 			element: {
 				origin: { x: 0, y: 0 }
+			},
+			parentScroll: {
+				origin: { x: 0, y: 0 }
 			}
 		};
 		
 		this.$timer = null;
 		this.$state = STATE.IDLE;
 		this.$dataFactory = this.getOption('dataFactory');
+		this.$mask = createMask();
+
+		element.appendChild(this.$mask);
 
 		this.$onMousedown = event => {
 			if (this.$state !== STATE.IDLE) {
 				return this.$cancel();
 			}
+			
+			page.disableDefaultBehavior();
 
-			if (this.getOption('handled') && !event.__VD_HANDLE__) {
+			if (this.getOption('handled') && !event.__VD_HANDLE_EVENT__) {
 				return;
 			}
 			
@@ -58,7 +67,6 @@ export default class DraggableController extends Controller {
 				this.$state = STATE.MOVING;
 				this.$start(event);
 
-				page.disableTextSelection();
 			};
 
 			const delay = this.getOption('delay');
@@ -81,7 +89,6 @@ export default class DraggableController extends Controller {
 				this.$end(event);
 			}
 
-			page.enableTextSelection();
 			this.$cancel();
 		};
 		
@@ -122,9 +129,10 @@ export default class DraggableController extends Controller {
 
 	$start(event) {
 		const { pointer, element } = this.position;
-		element.origin = getElementOffsetPosition(this.element);
 
+		element.origin = getElementOffsetPosition(this.element);
 		pointer.origin = getPointerClientPosition(event);
+		this.$mask.style.display = 'block';
 
 		this.element.addEventListener('mousemove', this.$onMousemove);
 		document.addEventListener('mousemove', this.$onMousemove);
@@ -144,7 +152,9 @@ export default class DraggableController extends Controller {
 	}
 
 	$end(event) {
+		page.enableDefaultBehavior();
 		this.$setOffsetFromEvent(event);
+		this.$mask.style.display = 'none';
 
 		this.$dispatch('vd-dragend', this.element, event);
 
