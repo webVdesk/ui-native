@@ -6,6 +6,10 @@ export class CoverController {
 		this.update();
 	}
 
+	get element() {
+		return this.$element;
+	}
+
 	show(start) {
 		this.$start = start;
 		this.update(start);

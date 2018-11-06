@@ -27,6 +27,7 @@ export function VdDragEvent(typeName, data, mouseEvent, element) {
 
 export function DefaultOptions() {
 	return {
+		clone: false,
 		mask: true,
 		handled: false,
 		constraint: false,
