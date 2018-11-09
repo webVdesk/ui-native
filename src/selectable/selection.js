@@ -4,14 +4,9 @@ import createCover from './cover';
 class Covering {
 	constructor() {
 		this.collection = [];
-		this.appendOnly = false;
 	}
 
-	setAppendOnly(value = false) {
-		return this.appendOnly = Boolean(value);
-	}
-
-	updateFrom(newCollection) {
+	updateFrom(newCollection, appendOnly = false) {
 		const leaveList = this.collection.filter(selectableController => {
 			return newCollection.indexOf(selectableController) === -1;
 		});
@@ -20,7 +15,7 @@ class Covering {
 			return this.collection.indexOf(selectableController) === -1;
 		});
 
-		if (!this.appendOnly) {
+		if (!appendOnly) {
 			leaveList.forEach(selectableController => selectableController.setSelected(false));
 		}
 		
@@ -34,6 +29,8 @@ export default class SelectionAreaController extends Controller{
 	constructor(element, options = {}) {
 		super(element, DefaultOptions());
 		this.initOptions(options);
+
+		this.$appendOnly = false;
 
 		const cover = createCover(this.getOption('style'));
 		const covering = this.covering = new Covering();
@@ -54,7 +51,7 @@ export default class SelectionAreaController extends Controller{
 			document.addEventListener('mousemove', updateCover);
 			document.addEventListener('mouseup', endCover);
 
-			selectableList = element.querySelectorAll('[vd-selectable]');
+			selectableList = this.getSelectableList();
 			cover.show(start);
 		};
 
@@ -80,7 +77,7 @@ export default class SelectionAreaController extends Controller{
 				selectableElement.dispatchEvent(event);
 			});
 
-			covering.updateFrom(collection);
+			covering.updateFrom(collection, this.$appendOnly);
 		};
 
 		function endCover() {
@@ -96,10 +93,27 @@ export default class SelectionAreaController extends Controller{
 			start.x = event.clientX;
 			start.y = event.clientY;
 
-			covering.updateFrom([]);
+			if (!this.$appendOnly) {
+				covering.updateFrom([]);
+				this.cancelSelectedAll();
+			}
 
 			document.addEventListener('mousemove', startCover);
 			document.addEventListener('mouseup', cancelCover);
+		});
+	}
+
+	setAppendOnly(value = false) {
+		return this.$appendOnly = Boolean(value);
+	}
+
+	getSelectableList() {
+		return this.$element.querySelectorAll('[vd-selectable]');
+	}
+
+	cancelSelectedAll() {
+		this.getSelectableList().forEach(element => {
+			element.dispatchEvent(new VdCancelEvent());
 		});
 	}
 }
@@ -125,5 +139,12 @@ function VdCoverEvent(collection, coverRect, fullContain) {
 		bubbles: false,
 		cancelable: false,
 		detail: { collection, coverRect, fullContain }
+	});
+}
+
+function VdCancelEvent() {
+	return new CustomEvent('vd-select-cancel', {
+		bubbles: false,
+		cancelable: false
 	});
 }

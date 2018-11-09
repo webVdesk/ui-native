@@ -58,12 +58,9 @@ function createSelectableElement() {
 document.body.appendChild(container);
 
 document.body.addEventListener('keydown', event => {
-	console.log(event.ctrlKey);
-	selectionArea.covering.setAppendOnly(true);
+	selectionArea.setAppendOnly(true);
 });
 
 document.body.addEventListener('keyup', event => {
-	console.log(event.ctrlKey);
-
-	selectionArea.covering.setAppendOnly(false);
+	selectionArea.setAppendOnly(false);
 });

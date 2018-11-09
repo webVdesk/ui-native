@@ -17,6 +17,14 @@ export default class SelectableController extends Controller {
 
 			element.dispatchEvent(new VdSelectEvent('vd-selectenter'));
 		});
+
+		element.addEventListener('vd-select-cancel', () => {
+			this.setSelected(false);
+		});
+		
+		element.addEventListener('click', () => {
+			this.setSelected(!element.vdSelected);
+		});
 	}
 
 	isContained(coverRect, full = false) {
