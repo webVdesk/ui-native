@@ -1,5 +1,5 @@
 {
-  "name": "vd-ui-native",
+  "name": "@vd/ui-native",
   "version": "1.0.0",
   "description": "Important interactive module by natvie ES. To be compatible for >= IE9.",
   "main": "index.js",
@@ -37,7 +37,5 @@
     "webpack-dev-server": "^3.1.10",
     "webpack-merge": "^4.1.4"
   },
-  "dependencies": {
-    "lodash": "^4.17.11"
-  }
+  "dependencies": {}
 }

@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import Controller from '../controller';
 import createMask from './mask';
 import * as handle from './handle';
@@ -237,7 +235,7 @@ export default class DraggableController extends Controller {
 	static destroyHandle(element) {
 		ensureHandleIsElement(element);
 
-		if (_.isUndefined(element.__VD_HANDLE__)) {
+		if (element.__VD_HANDLE__ === undefined) {
 			return false;
 		}
 

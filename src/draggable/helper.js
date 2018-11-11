@@ -1,8 +1,13 @@
-import _ from 'lodash';
 import createException from '../utils/exception';
 
+function noop() {}
+
+function isElement(value) {
+	return typeof value === 'object' && value.nodeType === 1;
+}
+
 export function ensureHandleIsElement(element) {
-	if (!_.isElement(element)) {
+	if (!isElement(element)) {
 		throw createException('Handle must be a HTMLElement', 'construction');
 	}
 }
@@ -34,7 +39,7 @@ export function DefaultOptions() {
 		delay: 0,
 		threshold: 0,
 		axis: null,
-		dataFactory: _.noop,
+		dataFactory: noop,
 		droppable: false,
 		restoreAfterEnd: false,
 		useGPU: false,

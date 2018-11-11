@@ -42,15 +42,19 @@ function createSelectableElement() {
 
 	selectable.addEventListener('mousedown', stopPropagation);
 
-	selectable.addEventListener('vd-change', event => {
-		const { target } = event;
+	// selectable.addEventListener('vd-change', event => {
+	// 	const { target } = event;
 
-		if (target.vdSelected) {
-			target.style.boxShadow = '0 0 4px 2px #000';
-		} else {
-			target.style.boxShadow = 'none';
-		}
-	});
+	// 	if (target.vdSelected) {
+	// 		target.style.boxShadow = '0 0 4px 2px #000';
+	// 	} else {
+	// 		target.style.boxShadow = 'none';
+	// 	}
+	// });
+
+	selectable.addEventListener('vd-coverenter', console.log);
+	selectable.addEventListener('vd-coverleave', console.log);
+	selectable.addEventListener('vd-cover', console.log);
 
 	container.appendChild(selectable);
 }
@@ -58,9 +62,9 @@ function createSelectableElement() {
 document.body.appendChild(container);
 
 document.body.addEventListener('keydown', event => {
-	selectionArea.setAppendOnly(true);
+	
 });
 
 document.body.addEventListener('keyup', event => {
-	selectionArea.setAppendOnly(false);
+	
 });

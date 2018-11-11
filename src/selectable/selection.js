@@ -6,31 +6,33 @@ class Covering {
 		this.collection = [];
 	}
 
-	updateFrom(newCollection, appendOnly = false) {
-		const leaveList = this.collection.filter(selectableController => {
-			return newCollection.indexOf(selectableController) === -1;
+	updateFrom(newCollection) {
+		const leaveList = this.collection.filter(controller => {
+			return newCollection.indexOf(controller) === -1;
 		});
 
-		const enterList = newCollection.filter(selectableController => {
-			return this.collection.indexOf(selectableController) === -1;
+		const enterList = newCollection.filter(controller => {
+			return this.collection.indexOf(controller) === -1;
 		});
-
-		if (!appendOnly) {
-			leaveList.forEach(selectableController => selectableController.setSelected(false));
-		}
 		
-		enterList.forEach(selectableController => selectableController.setSelected(true));
+		leaveList.forEach(element => element.dispatchEvent(new VdCoverEvent('vd-coverleave')));
+		enterList.forEach(element => element.dispatchEvent(new VdCoverEvent('vd-coverenter')));
 
 		this.collection = newCollection;
 	}
+}
+
+function isContained(rect, coverRect, full = false) {
+	return coverRect.left < rect.left + rect.width &&
+		coverRect.left + coverRect.width > rect.left &&
+		coverRect.top < rect.top + rect.height &&
+		coverRect.height + coverRect.top > rect.top;
 }
 
 export default class SelectionAreaController extends Controller{
 	constructor(element, options = {}) {
 		super(element, DefaultOptions());
 		this.initOptions(options);
-
-		this.$appendOnly = false;
 
 		const cover = createCover(this.getOption('style'));
 		const covering = this.covering = new Covering();
@@ -69,15 +71,17 @@ export default class SelectionAreaController extends Controller{
 			});
 
 			const collection = [];
+			const coverRect = cover.element.getBoundingClientRect();
 
 			selectableList.forEach(selectableElement => {
-				const event =
-					new VdCoverEvent(collection, cover.element.getBoundingClientRect(), fullContain);
-
-				selectableElement.dispatchEvent(event);
+				const rect = selectableElement.getBoundingClientRect();
+				
+				if (isContained(rect, coverRect, fullContain)) {
+					collection.push(selectableElement);
+				}
 			});
 
-			covering.updateFrom(collection, this.$appendOnly);
+			covering.updateFrom(collection);
 		};
 
 		function endCover() {
@@ -85,6 +89,11 @@ export default class SelectionAreaController extends Controller{
 
 			document.removeEventListener('mousemove', updateCover);
 			document.removeEventListener('mouseup', endCover);
+
+			const lastCollection = covering.collection;
+			covering.updateFrom([]);
+
+			lastCollection.forEach(element => element.dispatchEvent(new VdCoverEvent('vd-cover')));
 		}
 
 		element.addEventListener('mousedown', event => {
@@ -93,28 +102,15 @@ export default class SelectionAreaController extends Controller{
 			start.x = event.clientX;
 			start.y = event.clientY;
 
-			if (!this.$appendOnly) {
-				covering.updateFrom([]);
-				this.cancelSelectedAll();
-			}
+			covering.updateFrom([]);
 
 			document.addEventListener('mousemove', startCover);
 			document.addEventListener('mouseup', cancelCover);
 		});
 	}
 
-	setAppendOnly(value = false) {
-		return this.$appendOnly = Boolean(value);
-	}
-
 	getSelectableList() {
 		return this.$element.querySelectorAll('[vd-selectable]');
-	}
-
-	cancelSelectedAll() {
-		this.getSelectableList().forEach(element => {
-			element.dispatchEvent(new VdCancelEvent());
-		});
 	}
 }
 
@@ -134,17 +130,10 @@ function isOverThreshold(start, current, threshold) {
 	return Math.pow(deltaX, 2) + Math.pow(deltaY, 2) > Math.pow(threshold, 2);
 }
 
-function VdCoverEvent(collection, coverRect, fullContain) {
-	return new CustomEvent('vd-cover', {
+function VdCoverEvent(typeName) {
+	return new CustomEvent(typeName, {
 		bubbles: false,
 		cancelable: false,
-		detail: { collection, coverRect, fullContain }
-	});
-}
-
-function VdCancelEvent() {
-	return new CustomEvent('vd-select-cancel', {
-		bubbles: false,
-		cancelable: false
+		detail: {}
 	});
 }
