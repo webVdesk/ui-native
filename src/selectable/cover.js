@@ -79,9 +79,10 @@ function computeRectProperties(start, end) {
 	};
 }
 
-function createSelectionCover(style = {}) {
+function createSelectionCover(style = {}, className = 'vd-selection-area-cover') {
 	const areaElemenet = document.createElement('div');
 
+	areaElemenet.className = className;
 	Object.assign(areaElemenet.style, DEFAULT_AREA_STYLE, style);
 
 	return areaElemenet;

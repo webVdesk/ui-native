@@ -22,11 +22,18 @@ class Covering {
 	}
 }
 
-function isContained(rect, coverRect, full = false) {
+function isTouched(rect, coverRect) {
 	return coverRect.left < rect.left + rect.width &&
 		coverRect.left + coverRect.width > rect.left &&
 		coverRect.top < rect.top + rect.height &&
 		coverRect.height + coverRect.top > rect.top;
+}
+
+function isContained(rect, coverRect) {
+	return rect.left > coverRect.left &&
+		rect.right < coverRect.right &&
+		rect.top > coverRect.top &&
+		rect.bottom < coverRect.bottom;
 }
 
 export default class SelectionAreaController extends Controller{
@@ -34,7 +41,8 @@ export default class SelectionAreaController extends Controller{
 		super(element, DefaultOptions());
 		this.initOptions(options);
 
-		const cover = createCover(this.getOption('style'));
+		this.$cover = null;
+
 		const covering = this.covering = new Covering();
 
 		const start = { x: 0, y: 0 };
@@ -54,7 +62,8 @@ export default class SelectionAreaController extends Controller{
 			document.addEventListener('mouseup', endCover);
 
 			selectableList = this.getSelectableList();
-			cover.show(start);
+
+			this.$cover.show(start);
 		};
 
 		function cancelCover() {
@@ -65,18 +74,18 @@ export default class SelectionAreaController extends Controller{
 		const updateCover = event => {
 			const fullContain = this.getOption('fullContain');
 
-			cover.update({
+			this.$cover.update({
 				x: event.clientX,
 				y: event.clientY
 			});
 
 			const collection = [];
-			const coverRect = cover.element.getBoundingClientRect();
+			const coverRect = this.$cover.element.getBoundingClientRect();
 
 			selectableList.forEach(selectableElement => {
 				const rect = selectableElement.getBoundingClientRect();
 				
-				if (isContained(rect, coverRect, fullContain)) {
+				if ((fullContain ? isContained : isTouched)(rect, coverRect)) {
 					collection.push(selectableElement);
 				}
 			});
@@ -84,8 +93,9 @@ export default class SelectionAreaController extends Controller{
 			covering.updateFrom(collection);
 		};
 
-		function endCover() {
-			cover.hide();
+		const endCover = () => {
+			this.$cover.hide();
+			this.$cover = null;
 
 			document.removeEventListener('mousemove', updateCover);
 			document.removeEventListener('mouseup', endCover);
@@ -101,6 +111,7 @@ export default class SelectionAreaController extends Controller{
 
 			start.x = event.clientX;
 			start.y = event.clientY;
+			this.$cover = createCover(this.getOption('style'), this.getOption('className'));
 
 			covering.updateFrom([]);
 
@@ -110,7 +121,7 @@ export default class SelectionAreaController extends Controller{
 	}
 
 	getSelectableList() {
-		return this.$element.querySelectorAll('[vd-selectable]');
+		return Array.from(this.$element.querySelectorAll('[vd-selectable]'));
 	}
 }
 
